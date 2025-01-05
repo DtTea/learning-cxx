@@ -1,5 +1,6 @@
 ﻿#include "../exercise.h"
-
+#include <utility>
+#include <cstring>
 // READ: 类模板 <https://zh.cppreference.com/w/cpp/language/class_template>
 
 template<class T>
@@ -10,12 +11,17 @@ struct Tensor4D {
     Tensor4D(unsigned int const shape_[4], T const *data_) {
         unsigned int size = 1;
         // TODO: 填入正确的 shape 并计算 size
+        size = size * shape_[0] * shape_[1] * shape_[2] * shape_[3];
+
         data = new T[size];
+           
+        std::memcpy(shape, shape_, 4 * sizeof(int));
         std::memcpy(data, data_, size * sizeof(T));
     }
     ~Tensor4D() {
         delete[] data;
     }
+
 
     // 为了保持简单，禁止复制和移动
     Tensor4D(Tensor4D const &) = delete;
@@ -26,8 +32,46 @@ struct Tensor4D {
     // `others` 长度为 1 但 `this` 长度不为 1 的维度将发生广播计算。
     // 例如，`this` 形状为 `[1, 2, 3, 4]`，`others` 形状为 `[1, 2, 1, 4]`，
     // 则 `this` 与 `others` 相加时，3 个形状为 `[1, 2, 1, 4]` 的子张量各自与 `others` 对应项相加。
-    Tensor4D &operator+=(Tensor4D const &others) {
+    Tensor4D &operator+=(Tensor4D const &other) {
         // TODO: 实现单向广播的加法
+        bool broadcast[4];
+        for (auto i = 0u; i < 4; i++) {
+            if (broadcast[i] = shape[i] != other.shape[i])
+                ASSERT(other.shape[i] == 1, "!");
+        }
+        auto dst = this->data;
+        auto src = other.data;
+        T *marks[4]{src};
+        for (auto i0 = 0u; i0 < shape[0]; i0++) {
+            if (broadcast[0]) {
+                src = marks[0];
+            }
+            marks[1] = src;
+
+            for (auto i1 = 0u; i1 < shape[1]; i1++) {
+                if (broadcast[1]) {
+                    src = marks[1];
+                }
+                marks[2] = src;
+
+                for (auto i2 = 0u; i2 < shape[2]; i2++) {
+                    if (broadcast[2]) {
+                        src = marks[2];
+                    }
+                    marks[3] = src;
+
+                    for (auto i3 = 0u; i3 < shape[3]; i3++) {
+                        if (broadcast[3]) {
+                            src = marks[3];
+                        }
+                        *dst++ += *src++;
+
+                        //printf("%d %d %d %d %d %d %x %x %x %x %x %x\n",*dst,*src,i0,i1,i2,i3,marks[0],marks[1],marks[2],marks[3],dst,src);
+                    }
+                }
+            }
+        }
+
         return *this;
     }
 };

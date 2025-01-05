@@ -5,9 +5,12 @@
 struct Fibonacci {
     int numbers[11];
     // TODO: 修改方法签名和实现，使测试通过
-    int get(int i) {
+    int get(int i)  const {
+        return numbers[i];
     }
 };
+
+Fibonacci FIB = {{0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55}};
 
 int main(int argc, char **argv) {
     Fibonacci constexpr FIB{{0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55}};
